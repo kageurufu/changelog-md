@@ -15,16 +15,16 @@ repos:
         name: "changelog-md render"
         language: system
         pass_filenames: false
-        entry: cargo run -- render CHANGELOG.yml
+        entry: cargo run -- --changelog CHANGELOG.yml render
 
       - id: changelog-md:convert:toml
         name: "changelog-md convert source yml to toml"
         language: system
         pass_filenames: false
-        entry: cargo run -- convert --force --format toml CHANGELOG.yml
+        entry: cargo run -- --changelog CHANGELOG.yml convert --force --format toml
 
       - id: changelog-md:convert:json
         name: "changelog-md convert source yml to json"
         language: system
         pass_filenames: false
-        entry: cargo run -- convert --force --format json CHANGELOG.yml
+        entry: cargo run -- --changelog CHANGELOG.yml convert --force --format json

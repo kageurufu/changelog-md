@@ -7,6 +7,10 @@ use schemars::schema_for;
 #[derive(Parser)]
 #[command(version, about)]
 pub struct Args {
+    /// Manually specify the path to your changelog
+    #[clap(short, long)]
+    changelog: Option<std::path::PathBuf>,
+
     #[clap(subcommand)]
     command: Command,
 }
@@ -25,14 +29,10 @@ enum Command {
         force: bool,
         #[clap(short, long, default_value = "yaml")]
         format: Format,
-        source: Option<std::path::PathBuf>,
     },
 
     /// Validate a CHANGELOG
-    Validate {
-        /// CHANGELOG source file (yaml, json, or toml)
-        source: Option<std::path::PathBuf>,
-    },
+    Validate,
 
     /// Get the CHANGELOG schema
     Schema {
@@ -40,13 +40,27 @@ enum Command {
         destination: Option<std::path::PathBuf>,
     },
 
+    /// Add an unreleased change
+    Add {
+        change_type: ChangeType,
+        description: String,
+    },
+
     /// Render a CHANGELOG to Markdown
     Render {
-        /// CHANGELOG source file (yaml, json, or toml)
-        source: Option<std::path::PathBuf>,
         /// Destination path
         destination: Option<std::path::PathBuf>,
     },
+}
+
+#[derive(Debug, Clone, ValueEnum)]
+enum ChangeType {
+    Added,
+    Changed,
+    Deprecated,
+    Removed,
+    Fixed,
+    Security,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -73,29 +87,61 @@ impl Format {
         }
     }
 }
+impl TryFrom<&std::path::PathBuf> for Format {
+    type Error = anyhow::Error;
 
-fn autodetect_source() -> Option<std::path::PathBuf> {
-    for entry in std::fs::read_dir(".").unwrap() {
-        let path = entry.unwrap().path();
-        if let Some(file_stem) = path.file_stem() {
-            if let Some(ext) = path.extension() {
-                if file_stem.to_ascii_lowercase() == "changelog"
-                    && (ext == "yml" || ext == "yaml" || ext == "toml" || ext == "json")
-                {
-                    return Some(path);
-                }
-            }
+    fn try_from(value: &std::path::PathBuf) -> Result<Self, Self::Error> {
+        match value.extension().map(|v| v.to_ascii_lowercase()) {
+            Some(ext) if ext == "yml" || ext == "yaml" => Ok(Format::Yaml),
+            Some(ext) if ext == "json" => Ok(Format::Json),
+            Some(ext) if ext == "toml" => Ok(Format::Toml),
+            Some(ext) => Err(anyhow!("Unknown file extension {}", ext.to_string_lossy())),
+            _ => Err(anyhow!(
+                "Missing file extension for {}",
+                value.to_string_lossy()
+            )),
         }
     }
-    None
+}
+
+fn autodetect_source() -> anyhow::Result<std::path::PathBuf> {
+    let entries = std::fs::read_dir(".")
+        .unwrap()
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| {
+            p.file_stem()
+                .is_some_and(|s| s.eq_ignore_ascii_case("changelog"))
+        })
+        .filter(|p| {
+            p.extension()
+                .map(|s| s.to_ascii_lowercase())
+                .is_some_and(|ext| ext == "yml" || ext == "yaml" || ext == "toml" || ext == "json")
+        })
+        .collect::<Vec<_>>();
+
+    if entries.len() > 1 {
+        Err(anyhow!("Multiple changelog source files found"))
+    } else {
+        entries
+            .first()
+            .cloned()
+            .ok_or(anyhow!("Unable to find changelog source file"))
+    }
 }
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
+    let changelog_file = {
+        match args.changelog {
+            Some(filename) => Ok(filename),
+            None => autodetect_source(),
+        }
+    };
 
     match args.command {
         Command::Init { format } => {
-            let filename: std::path::PathBuf = format!("CHANGELOG.{}", format.extension()).into();
+            let filename = changelog_file
+                .unwrap_or_else(|_| format!("CHANGELOG.{}", format.extension()).into());
 
             if filename.exists() {
                 Err(anyhow!("{} already exists", filename.display()))
@@ -109,53 +155,45 @@ fn main() -> anyhow::Result<()> {
             }
         }
 
-        Command::Convert {
-            format,
-            force,
-            source,
-        } => match source.or_else(|| autodetect_source()) {
-            None => Err(anyhow!("Unable to find a CHANGELOG source file")),
-            Some(source) => {
-                let destination = source.with_extension(format.extension());
-                if destination.exists() && !force {
-                    Err(anyhow!("{} already exists", destination.display()))
-                } else {
-                    let changelog = Changelog::from_path(&source)?;
-                    let changelog = format.to_string(&changelog)?;
-                    eprintln!(
-                        "Converting {} to {}",
-                        source.display(),
-                        destination.display()
-                    );
-                    std::fs::write(destination, changelog)?;
+        Command::Convert { format, force } => {
+            let changelog_file = changelog_file?;
+            let destination = changelog_file.with_extension(format.extension());
 
-                    Ok(())
-                }
+            if destination.exists() && !force {
+                return Err(anyhow!("{} already exists", destination.display()));
             }
-        },
 
-        Command::Render {
-            source,
-            destination,
-        } => match source.or_else(|| autodetect_source()) {
-            None => Err(anyhow!("Unable to find a CHANGELOG source file")),
-            Some(source) => {
-                let changelog = Changelog::from_path(&source)?;
+            let changelog = Changelog::from_path(&changelog_file)?;
+            let changelog = format.to_string(&changelog)?;
+            eprintln!(
+                "Converting {} to {}",
+                changelog_file.display(),
+                destination.display()
+            );
+            std::fs::write(destination, changelog)?;
 
-                let path = destination.unwrap_or_else(|| source.with_extension("md"));
-                eprintln!("Rendering {} to {}", source.display(), path.display());
-                Ok(std::fs::write(path, format!("{}", &changelog))?)
-            }
-        },
+            Ok(())
+        }
 
-        Command::Validate { source } => match source.or_else(|| autodetect_source()) {
-            None => Err(anyhow!("Unable to find a CHANGELOG source file")),
-            Some(source) => {
-                Changelog::from_path(&source)?;
-                println!("No issues found");
-                Ok(())
-            }
-        },
+        Command::Render { destination } => {
+            let changelog_file = changelog_file?;
+            let changelog = Changelog::from_path(&changelog_file)?;
+
+            let destination = destination.unwrap_or_else(|| changelog_file.with_extension("md"));
+
+            eprintln!(
+                "Rendering {} to {}",
+                changelog_file.display(),
+                destination.display()
+            );
+            Ok(std::fs::write(destination, format!("{}", &changelog))?)
+        }
+
+        Command::Validate => {
+            Changelog::from_path(&changelog_file?)?;
+            println!("No issues found");
+            Ok(())
+        }
 
         Command::Schema { destination } => {
             let schema = {
@@ -170,6 +208,31 @@ fn main() -> anyhow::Result<()> {
                 Some(path) => std::fs::write(path, &schema)?,
                 None => print!("{}", &schema),
             };
+
+            Ok(())
+        }
+
+        Command::Add {
+            change_type,
+            description,
+        } => {
+            let changelog_file = changelog_file?;
+            let format = Format::try_from(&changelog_file)?;
+
+            let mut changelog = Changelog::from_path(&changelog_file)?;
+
+            match change_type {
+                ChangeType::Added => changelog.unreleased.push_added(description),
+                ChangeType::Changed => changelog.unreleased.push_changed(description),
+                ChangeType::Deprecated => changelog.unreleased.push_deprecated(description),
+                ChangeType::Removed => changelog.unreleased.push_removed(description),
+                ChangeType::Fixed => changelog.unreleased.push_fixed(description),
+                ChangeType::Security => changelog.unreleased.push_security(description),
+            };
+
+            std::fs::write(&changelog_file, format.to_string(&changelog)?)?;
+            eprintln!("Added change to {}", &changelog_file.display());
+
             Ok(())
         }
     }

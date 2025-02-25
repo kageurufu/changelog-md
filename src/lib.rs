@@ -62,6 +62,25 @@ pub struct Changes {
 }
 
 impl Changes {
+    pub fn push_added(&mut self, change: String) {
+        self.added.push(change)
+    }
+    pub fn push_changed(&mut self, change: String) {
+        self.changed.push(change)
+    }
+    pub fn push_deprecated(&mut self, change: String) {
+        self.deprecated.push(change)
+    }
+    pub fn push_fixed(&mut self, change: String) {
+        self.fixed.push(change)
+    }
+    pub fn push_removed(&mut self, change: String) {
+        self.removed.push(change)
+    }
+    pub fn push_security(&mut self, change: String) {
+        self.security.push(change)
+    }
+
     fn is_empty(&self) -> bool {
         self.added.is_empty()
             && self.changed.is_empty()

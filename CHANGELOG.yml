@@ -1,19 +1,17 @@
-# yaml-language-server: $schema=./CHANGELOG.schema.json
-
 title: changelog-md
 description: |
   All notable changes to this project will be documented in this file.
 
   The format is derived from [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 repository: https://github.com/kageurufu/changelog-md
-
-unreleased: {}
-
+unreleased:
+  added:
+  - '`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`'
 versions:
-  "1.0.0":
-    tag: "1.0.0"
+  1.0.0:
+    tag: 1.0.0
     date: 2025-02-24
     description: |
       Initial release, including the 1.0 Schema specification
+    yanked: null
