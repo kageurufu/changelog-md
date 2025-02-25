@@ -4,7 +4,8 @@
   "repository": "https://github.com/kageurufu/changelog-md",
   "unreleased": {
     "added": [
-      "`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`"
+      "`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`",
+      "`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`"
     ]
   },
   "versions": {

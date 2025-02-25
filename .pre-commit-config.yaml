@@ -28,3 +28,24 @@ repos:
         language: system
         pass_filenames: false
         entry: cargo run -- --changelog CHANGELOG.yml convert --force --format json
+
+      - id: rust:format
+        name: "cargo fmt"
+        language: system
+        pass_filenames: false
+        types: [rust]
+        entry: cargo fmt
+
+      - id: rust:check
+        name: "cargo clippy"
+        language: system
+        pass_filenames: false
+        types: [rust]
+        entry: cargo clippy
+
+      - id: rust:test
+        name: "cargo-nextest"
+        language: system
+        pass_filenames: false
+        types: [rust, yaml, toml, json]
+        entry: cargo nextest run

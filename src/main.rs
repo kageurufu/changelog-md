@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use changelog_md::Changelog;
+use changelog_md::{Changelog, Version};
 
 use clap::{Parser, Subcommand, ValueEnum};
 use schemars::schema_for;
@@ -44,6 +44,20 @@ enum Command {
     Add {
         change_type: ChangeType,
         description: String,
+    },
+
+    Release {
+        /// Git Tag, if differs from the version
+        #[clap(long)]
+        tag: Option<String>,
+        /// Release date, defaults to the current date
+        #[clap(long)]
+        date: Option<String>,
+
+        /// New version name
+        version: String,
+        /// Release description
+        description: Option<String>,
     },
 
     /// Render a CHANGELOG to Markdown
@@ -232,6 +246,38 @@ fn main() -> anyhow::Result<()> {
 
             std::fs::write(&changelog_file, format.to_string(&changelog)?)?;
             eprintln!("Added change to {}", &changelog_file.display());
+
+            Ok(())
+        }
+
+        Command::Release {
+            tag,
+            date,
+            version,
+            description,
+        } => {
+            let changelog_file = changelog_file?;
+            let format = Format::try_from(&changelog_file)?;
+            let mut changelog = Changelog::from_path(&changelog_file)?;
+
+            let date = date.unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d").to_string());
+            let tag = tag.unwrap_or(version.clone());
+
+            let changes = changelog.unreleased;
+            changelog.unreleased = Default::default();
+            changelog.versions.insert(
+                0,
+                Version {
+                    version,
+                    tag,
+                    date,
+                    description,
+                    changes,
+                    ..Default::default()
+                },
+            );
+
+            std::fs::write(&changelog_file, format.to_string(&changelog)?)?;
 
             Ok(())
         }

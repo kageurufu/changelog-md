@@ -111,6 +111,7 @@ name = "changelog-md"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "clap",
  "schemars",
  "serde",
@@ -129,8 +130,10 @@ checksum = "7e36cc9d416881d2e24f9a963be5fb1cd90966419ac844274161d10488b3e825"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-targets",
 ]
 
