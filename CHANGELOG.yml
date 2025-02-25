@@ -9,6 +9,9 @@ unreleased:
   added:
   - '`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`'
   - '`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`'
+  changed:
+  - Markdown formatting adjustments, mostly fixing newlines
+  - Moved revision URLs to a `# Revisions` section
   fixed:
   - Changelog::from_path now accepts `impl Into<std::path::PathBuf>`
   - Add help string to `changelog-md release`

@@ -8,10 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - `changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`
 - `changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`
 
+### Changed
+
+- Markdown formatting adjustments, mostly fixing newlines
+- Moved revision URLs to a `# Revisions` section
+
 ### Fixed
+
 - Changelog::from_path now accepts `impl Into<std::path::PathBuf>`
 - Add help string to `changelog-md release`
 - `init` default value for `--format` was invalid
@@ -21,10 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add tests for all cli functions
 - Fix git urls, tag comparison was reversed
 
-
 ## 1.0.0 - 2025-02-24
 
 Initial release, including the 1.0 Schema specification
 
-[unreleased] https://github.com/kageurufu/changelog-md/compare/1.0.0...HEAD
-[1.0.0] https://github.com/kageurufu/changelog-md/commits/1.0.0
+# Revisions
+
+- [unreleased] https://github.com/kageurufu/changelog-md/compare/1.0.0...HEAD
+- [1.0.0] https://github.com/kageurufu/changelog-md/commits/1.0.0

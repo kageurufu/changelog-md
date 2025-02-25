@@ -98,11 +98,12 @@ impl Changes {
         changes: &Vec<String>,
     ) -> std::fmt::Result {
         if !changes.is_empty() {
+            writeln!(f)?;
             writeln!(f, "### {}", title)?;
+            writeln!(f)?;
             for change in changes {
                 writeln!(f, "- {}", change)?;
             }
-            writeln!(f)?;
         }
         Ok(())
     }
@@ -118,7 +119,6 @@ impl std::fmt::Display for Changelog {
         }
         if !self.unreleased.is_empty() {
             writeln!(f, "## [Unreleased]")?;
-            writeln!(f)?;
             writeln!(f, "{}", self.unreleased)?;
         }
 
@@ -126,20 +126,23 @@ impl std::fmt::Display for Changelog {
             write!(f, "{}", version)?;
         }
 
+        writeln!(f)?;
+        writeln!(f, "# Revisions")?;
+        writeln!(f)?;
         match &self.versions[..] {
             // We haven't released a version, just link all commits
-            [] => writeln!(f, "[unreleased] {}/commits/", self.repository)?,
+            [] => writeln!(f, "- [unreleased] {}/commits/", self.repository)?,
 
             versions @ [.., last] => {
                 writeln!(
                     f,
-                    "[unreleased] {}/compare/{}...HEAD",
+                    "- [unreleased] {}/compare/{}...HEAD",
                     self.repository, versions[0].tag
                 )?;
                 for idx in 0..(versions.len() - 1) {
                     writeln!(
                         f,
-                        "[{}] {}/compare/{}..{}",
+                        "- [{}] {}/compare/{}..{}",
                         versions[idx].version,
                         self.repository,
                         versions[idx + 1].tag,
@@ -149,7 +152,7 @@ impl std::fmt::Display for Changelog {
                 // The initial version is a commit url
                 writeln!(
                     f,
-                    "[{}] {}/commits/{}",
+                    "- [{}] {}/commits/{}",
                     last.version, self.repository, last.tag
                 )?;
             }
@@ -168,7 +171,7 @@ impl std::fmt::Display for Version {
         writeln!(f)?;
         writeln!(f)?;
         if let Some(desc) = &self.description {
-            writeln!(f, "{}", desc)?;
+            writeln!(f, "{}", desc.trim())?;
         }
         if !self.changes.is_empty() {
             writeln!(f, "{}", self.changes)?;
