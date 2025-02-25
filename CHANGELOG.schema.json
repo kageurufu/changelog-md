@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://changelog-md.github.io/1.0/changelog",
+  "title": "Changelog",
+  "description": "A user-friendly format for writing Changelogs in a verifiable and more git-friendly format",
+  "type": "object",
+  "required": [
+    "description",
+    "repository",
+    "title",
+    "unreleased",
+    "versions"
+  ],
+  "properties": {
+    "description": {
+      "description": "A description of your project. It's recommended to note whether you follow semantic versioning",
+      "type": "string"
+    },
+    "repository": {
+      "description": "Your source repository link",
+      "type": "string"
+    },
+    "title": {
+      "title": "The heading",
+      "type": "string"
+    },
+    "unreleased": {
+      "description": "Currently unreleased changes",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Changes"
+        }
+      ]
+    },
+    "versions": {
+      "description": "Releases",
+      "allOf": [
+        {
+          "$ref": "#/definitions/KeyValueMap(Version)"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "Changes": {
+      "description": "Any changes made in this version",
+      "type": "object",
+      "properties": {
+        "added": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deprecated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fixed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "security": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "KeyValueMap(Version)": {
+      "type": "object",
+      "additionalProperties": {
+        "description": "A released version",
+        "type": "object",
+        "required": [
+          "date",
+          "tag"
+        ],
+        "properties": {
+          "added": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "changed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "date": {
+            "description": "Date the version was released as an ISO Date String",
+            "type": "string",
+            "pattern": "^\\d{4}-[01]\\d-[0-3]\\d$"
+          },
+          "deprecated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "description": "Optional Markdown description of this version",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fixed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "security": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tag": {
+            "type": "string"
+          },
+          "yanked": {
+            "description": "If a version was yanked, the reason why",
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
