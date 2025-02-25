@@ -142,8 +142,8 @@ impl std::fmt::Display for Changelog {
                         "[{}] {}/compare/{}..{}",
                         versions[idx].version,
                         self.repository,
+                        versions[idx + 1].tag,
                         versions[idx].tag,
-                        versions[idx + 1].tag
                     )?;
                 }
                 // The initial version is a commit url
