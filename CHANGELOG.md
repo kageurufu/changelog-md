@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Changelog::from_path now accepts `impl Into<std::path::PathBuf>`
+- Add help string to `changelog-md release`
+- `init` default value for `--format` was invalid
+- accept `--format yml` as an alias for yaml
+- Use pretty toml rendering
+- Switch from deprecated serde_yaml to serde_yml
 
 
 ## 1.0.0 - 2025-02-24

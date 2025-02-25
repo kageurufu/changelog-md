@@ -8,8 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 repository = "https://github.com/kageurufu/changelog-md"
 
 [unreleased]
-added = ["`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`", "`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`"]
-fixed = ["Changelog::from_path now accepts `impl Into<std::path::PathBuf>`"]
+added = [
+    "`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`",
+    "`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`",
+]
+fixed = [
+    "Changelog::from_path now accepts `impl Into<std::path::PathBuf>`",
+    "Add help string to `changelog-md release`",
+    "`init` default value for `--format` was invalid",
+    "accept `--format yml` as an alias for yaml",
+    "Use pretty toml rendering",
+    "Switch from deprecated serde_yaml to serde_yml",
+]
 
 [versions."1.0.0"]
 tag = "1.0.0"

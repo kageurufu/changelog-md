@@ -19,7 +19,7 @@ pub struct Args {
 enum Command {
     /// Generate an initial CHANGELOG.yml
     Init {
-        #[clap(short, long, default_value = "Format::Yaml")]
+        #[clap(short, long, default_value = "yaml")]
         format: Format,
     },
 
@@ -46,6 +46,7 @@ enum Command {
         description: String,
     },
 
+    /// Create a new release from all unreleased changes
     Release {
         /// Git Tag, if differs from the version
         #[clap(long)]
@@ -77,8 +78,10 @@ enum ChangeType {
     Security,
 }
 
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Default, Clone, ValueEnum)]
 enum Format {
+    #[default]
+    #[value(alias("yml"))]
     Yaml,
     Toml,
     Json,
@@ -95,12 +98,13 @@ impl Format {
 
     pub fn to_string(&self, seed: &Changelog) -> anyhow::Result<String> {
         match self {
-            Format::Yaml => Ok(serde_yaml::to_string(&seed)?),
-            Format::Toml => Ok(toml::to_string(&seed)?),
-            Format::Json => Ok(serde_json::to_string_pretty(&seed)? + "\n"),
+            Format::Yaml => seed.to_yaml(),
+            Format::Toml => seed.to_toml(),
+            Format::Json => seed.to_json(),
         }
     }
 }
+
 impl TryFrom<&std::path::PathBuf> for Format {
     type Error = anyhow::Error;
 

@@ -192,21 +192,6 @@ impl std::fmt::Display for Changes {
 }
 
 impl Changelog {
-    pub fn from_yaml(s: &str) -> anyhow::Result<Changelog> {
-        let de = serde_yaml::Deserializer::from_str(s);
-        Ok(serde_path_to_error::deserialize(de)?)
-    }
-
-    pub fn from_json(s: &str) -> anyhow::Result<Changelog> {
-        let mut de = serde_json::Deserializer::from_str(s);
-        Ok(serde_path_to_error::deserialize(&mut de)?)
-    }
-
-    pub fn from_toml(s: &str) -> anyhow::Result<Changelog> {
-        let de = toml::Deserializer::new(s);
-        Ok(serde_path_to_error::deserialize(de)?)
-    }
-
     pub fn from_path(path: impl Into<std::path::PathBuf>) -> anyhow::Result<Changelog> {
         let path = path.into();
 
@@ -233,6 +218,33 @@ impl Changelog {
                 path.display()
             )),
         }
+    }
+
+    pub fn from_yaml(s: &str) -> anyhow::Result<Changelog> {
+        let de = serde_yml::Deserializer::from_str(s);
+        Ok(serde_path_to_error::deserialize(de)?)
+    }
+
+    pub fn from_json(s: &str) -> anyhow::Result<Changelog> {
+        let mut de = serde_json::Deserializer::from_str(s);
+        Ok(serde_path_to_error::deserialize(&mut de)?)
+    }
+
+    pub fn from_toml(s: &str) -> anyhow::Result<Changelog> {
+        let de = toml::Deserializer::new(s);
+        Ok(serde_path_to_error::deserialize(de)?)
+    }
+
+    pub fn to_yaml(&self) -> anyhow::Result<String> {
+        Ok(serde_yml::to_string(&self)?)
+    }
+
+    pub fn to_toml(&self) -> anyhow::Result<String> {
+        Ok(toml::to_string_pretty(&self)?)
+    }
+
+    pub fn to_json(&self) -> anyhow::Result<String> {
+        Ok(serde_json::to_string_pretty(&self)? + "\n")
     }
 }
 
