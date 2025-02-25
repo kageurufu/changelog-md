@@ -16,6 +16,7 @@ unreleased:
   - accept `--format yml` as an alias for yaml
   - Use pretty toml rendering
   - Switch from deprecated serde_yaml to serde_yml
+  - Add tests for all cli functions
 versions:
   '1.0.0':
     tag: '1.0.0'

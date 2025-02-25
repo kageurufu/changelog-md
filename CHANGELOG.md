@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - accept `--format yml` as an alias for yaml
 - Use pretty toml rendering
 - Switch from deprecated serde_yaml to serde_yml
+- Add tests for all cli functions
 
 
 ## 1.0.0 - 2025-02-24

@@ -287,3 +287,225 @@ fn main() -> anyhow::Result<()> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::process::Command;
+
+    use assert_cmd::prelude::*;
+    use assert_fs::{NamedTempFile, prelude::*};
+    use predicates::prelude::*;
+    use rstest::*;
+
+    use super::Format;
+    use changelog_md::{Changelog, Changes};
+
+    fn predicate_is_yaml<Type: serde::de::DeserializeOwned>()
+    -> predicates::function::FnPredicate<impl Fn(&str) -> bool, str> {
+        predicate::function(|contents: &str| serde_yml::from_str::<Type>(&contents).is_ok())
+    }
+
+    fn predicate_is_toml<Type: serde::de::DeserializeOwned>()
+    -> predicates::function::FnPredicate<impl Fn(&str) -> bool, str> {
+        predicate::function(|contents: &str| toml::from_str::<Type>(&contents).is_ok())
+    }
+
+    fn predicate_is_json<Type: serde::de::DeserializeOwned>()
+    -> predicates::function::FnPredicate<impl Fn(&str) -> bool, str> {
+        predicate::function(|contents: &str| serde_json::from_str::<Type>(&contents).is_ok())
+    }
+
+    #[rstest]
+    pub fn init_changelog(
+        #[values(Format::Yaml, Format::Toml, Format::Json)] format: Format,
+    ) -> anyhow::Result<()> {
+        let tempdir = assert_fs::TempDir::new()?;
+
+        let mut cmd = Command::cargo_bin("changelog-md")?;
+
+        cmd.current_dir(&tempdir)
+            .arg("init")
+            .args(["--format", format.extension()])
+            .assert()
+            .success();
+
+        let child = tempdir.child(format!("CHANGELOG.{}", format.extension()));
+
+        child.assert(predicate::path::is_file());
+
+        Changelog::from_path(child.path())?;
+
+        Ok(())
+    }
+
+    /// Validate reading changelogs, by reading this repositories changelogs
+    #[rstest]
+    pub fn test_validate(
+        #[values(Format::Yaml, Format::Toml, Format::Json)] format: Format,
+    ) -> anyhow::Result<()> {
+        let mut cmd = Command::cargo_bin("changelog-md")?;
+
+        cmd.args(["--changelog", &format!("CHANGELOG.{}", format.extension())])
+            .arg("validate")
+            .assert()
+            .success();
+
+        Ok(())
+    }
+
+    #[rstest]
+    pub fn test_render() -> anyhow::Result<()> {
+        let mut cmd = Command::cargo_bin("changelog-md")?;
+        let tmpfile = assert_fs::NamedTempFile::new("CHANGELOG.md")?;
+
+        cmd.args(["--changelog", "CHANGELOG.yml"])
+            .arg("render")
+            .arg(tmpfile.path())
+            .assert()
+            .success();
+
+        Ok(())
+    }
+
+    #[rstest]
+    pub fn test_convert() -> anyhow::Result<()> {
+        let tmpdir = assert_fs::TempDir::new()?;
+        let yml = tmpdir.child("CHANGELOG.yml");
+        let json = tmpdir.child("CHANGELOG.json");
+        let toml = tmpdir.child("CHANGELOG.toml");
+
+        Command::cargo_bin("changelog-md")?
+            .current_dir(&tmpdir)
+            .arg("init")
+            .assert()
+            .success();
+
+        yml.assert(predicate::path::is_file())
+            .assert(predicate_is_yaml::<Changelog>());
+
+        Command::cargo_bin("changelog-md")?
+            .current_dir(&tmpdir)
+            .args(["--changelog", "CHANGELOG.yml"])
+            .arg("convert")
+            .args(["--format", "toml"])
+            .assert()
+            .success();
+        toml.assert(predicate::path::is_file())
+            .assert(predicate_is_toml::<Changelog>());
+
+        Command::cargo_bin("changelog-md")?
+            .current_dir(&tmpdir)
+            .args(["--changelog", "CHANGELOG.yml"])
+            .arg("convert")
+            .args(["--format", "json"])
+            .assert()
+            .success();
+        json.assert(predicate::path::is_file())
+            .assert(predicate_is_json::<Changelog>());
+
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_schema() -> anyhow::Result<()> {
+        Command::cargo_bin("changelog-md")?
+            .arg("schema")
+            .assert()
+            .success()
+            .stdout(predicate_is_json::<schemars::schema::RootSchema>());
+
+        let tmpfile = assert_fs::NamedTempFile::new("CHANGELOG.schema.json")?;
+
+        Command::cargo_bin("changelog-md")?
+            .arg("schema")
+            .arg(&tmpfile.path())
+            .assert()
+            .success();
+
+        tmpfile
+            .assert(predicate::path::is_file())
+            .assert(predicate_is_json::<schemars::schema::RootSchema>());
+
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_add() -> anyhow::Result<()> {
+        let tmpfile = NamedTempFile::new("CHANGELOG.yml")?;
+
+        Command::cargo_bin("changelog-md")?
+            .arg("--changelog")
+            .arg(&tmpfile.path())
+            .arg("init")
+            .assert()
+            .success();
+
+        tmpfile.assert(predicate_is_yaml::<Changelog>());
+
+        Command::cargo_bin("changelog-md")?
+            .arg("--changelog")
+            .arg(&tmpfile.path())
+            .arg("add")
+            .arg("changed")
+            .arg("testing adding a new change")
+            .assert()
+            .success();
+
+        tmpfile
+            .assert(predicate_is_yaml::<Changelog>())
+            .assert(predicate::function(|contents: &str| {
+                let changelog = Changelog::from_yaml(contents).unwrap();
+
+                changelog
+                    .unreleased
+                    .changed
+                    .contains(&"testing adding a new change".to_string())
+            }));
+
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_release() -> anyhow::Result<()> {
+        let tmpfile = NamedTempFile::new("CHANGELOG.yml")?;
+        let changelog = Changelog {
+            unreleased: Changes {
+                changed: vec!["Testing releases".to_string()],
+                ..Default::default()
+            },
+            versions: vec![],
+            ..Default::default()
+        };
+        tmpfile.write_str(&changelog.to_yaml()?)?;
+
+        Command::cargo_bin("changelog-md")?
+            .arg("--changelog")
+            .arg(&tmpfile.path())
+            .arg("release")
+            .args(["--tag", "v1.2.3"])
+            .args(["--date", "2025-01-01"])
+            .arg("1.2.3")
+            .arg("some description")
+            .assert()
+            .success();
+
+        tmpfile.assert(predicate::function(|contents: &str| {
+            let changelog = Changelog::from_yaml(&contents).expect("Failed to parse");
+            let version = changelog.versions.first().expect("Did not find a version");
+
+            changelog.unreleased.changed.is_empty()
+                && changelog.versions.len() == 1
+                && version.version == "1.2.3"
+                && version.tag == "v1.2.3"
+                && version.date == "2025-01-01"
+                && version.description == Some("some description".to_string())
+                && version.changes
+                    == Changes {
+                        changed: vec!["Testing releases".to_string()],
+                        ..Default::default()
+                    }
+        }));
+
+        Ok(())
+    }
+}

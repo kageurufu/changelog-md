@@ -44,7 +44,7 @@ pub struct Version {
 }
 
 /// Any changes made in this version
-#[derive(Debug, Default, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Default, Deserialize, Serialize, JsonSchema, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct Changes {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
