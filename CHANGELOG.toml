@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 repository = "https://github.com/kageurufu/changelog-md"
 
 [unreleased]
+
+[versions."1.1.1"]
+tag = "1.1.1"
+date = "2025-02-25"
+description = "Documentation update"
 added = ["documentation for all public members"]
 fixed = ["Add repository, keywords, and categories to Cargo.toml"]
 

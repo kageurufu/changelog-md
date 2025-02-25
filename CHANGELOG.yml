@@ -5,12 +5,17 @@ description: |
   The format is derived from [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 repository: https://github.com/kageurufu/changelog-md
-unreleased:
-  added:
-  - documentation for all public members
-  fixed:
-  - Add repository, keywords, and categories to Cargo.toml
+unreleased: {}
 versions:
+  '1.1.1':
+    tag: '1.1.1'
+    date: '2025-02-25'
+    description: Documentation update
+    yanked: null
+    added:
+    - documentation for all public members
+    fixed:
+    - Add repository, keywords, and categories to Cargo.toml
   '1.1.0':
     tag: '1.1.0'
     date: '2025-02-25'
