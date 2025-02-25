@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is derived from [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- documentation for all public members
+
+### Fixed
+
+- Add repository, keywords, and categories to Cargo.toml
+
 ## 1.1.0 - 2025-02-25
 
 First release made through `changelog-md release` 🎉
@@ -36,6 +46,6 @@ Initial release, including the 1.0 Schema specification
 
 # Revisions
 
-- [unreleased] https://github.com/kageurufu/changelog-md/compare/1.1.0...HEAD
-- [1.1.0] https://github.com/kageurufu/changelog-md/compare/1.0.0..1.1.0
-- [1.0.0] https://github.com/kageurufu/changelog-md/commits/1.0.0
+- [unreleased] <https://github.com/kageurufu/changelog-md/compare/1.1.0...HEAD>
+- [1.1.0] <https://github.com/kageurufu/changelog-md/compare/1.0.0..1.1.0>
+- [1.0.0] <https://github.com/kageurufu/changelog-md/commits/1.0.0>

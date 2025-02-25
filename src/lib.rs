@@ -1,3 +1,8 @@
+#![warn(missing_docs)]
+
+//! A serializable format for updating CHANGELOG files
+//! and generating CHANGELOG.md
+
 use anyhow::anyhow;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -9,7 +14,7 @@ use serde_with::{KeyValueMap, serde_as};
 #[derive(Debug, Deserialize, Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Changelog {
-    /// # The heading
+    /// Your changelog's heading
     pub title: String,
     /// A description of your project.
     /// It's recommended to note whether you follow semantic versioning
@@ -30,6 +35,7 @@ pub struct Version {
     /// The version name
     #[serde(rename = "$key$")]
     pub version: String,
+    /// Git tag associated with this version
     pub tag: String,
     /// Date the version was released as an ISO Date String
     #[schemars(regex(pattern = r"^\d{4}-[01]\d-[0-3]\d$"))]
@@ -39,6 +45,7 @@ pub struct Version {
     /// If a version was yanked, the reason why
     #[serde(default)]
     pub yanked: Option<String>,
+    /// Changes within this version
     #[serde(flatten)]
     pub changes: Changes,
 }
@@ -47,36 +54,48 @@ pub struct Version {
 #[derive(Debug, Default, Deserialize, Serialize, JsonSchema, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct Changes {
+    /// New additions made in this version
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub added: Vec<String>,
+    /// Changes to existing features
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub changed: Vec<String>,
+    /// Deprecations
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub deprecated: Vec<String>,
+    /// Changes the removed a feature
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub removed: Vec<String>,
+    /// Fixes to existing features
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub fixed: Vec<String>,
+    /// Security changes
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub security: Vec<String>,
 }
 
 impl Changes {
+    /// Add a new feature
     pub fn push_added(&mut self, change: String) {
         self.added.push(change)
     }
+    /// Add a change
     pub fn push_changed(&mut self, change: String) {
         self.changed.push(change)
     }
+    /// Add a deprecation
     pub fn push_deprecated(&mut self, change: String) {
         self.deprecated.push(change)
     }
+    /// Add a fix
     pub fn push_fixed(&mut self, change: String) {
         self.fixed.push(change)
     }
+    /// Add a removal change
     pub fn push_removed(&mut self, change: String) {
         self.removed.push(change)
     }
+    /// Add a security change
     pub fn push_security(&mut self, change: String) {
         self.security.push(change)
     }
@@ -131,18 +150,18 @@ impl std::fmt::Display for Changelog {
         writeln!(f)?;
         match &self.versions[..] {
             // We haven't released a version, just link all commits
-            [] => writeln!(f, "- [unreleased] {}/commits/", self.repository)?,
+            [] => writeln!(f, "- [unreleased] <{}/commits/>", self.repository)?,
 
             versions @ [.., last] => {
                 writeln!(
                     f,
-                    "- [unreleased] {}/compare/{}...HEAD",
+                    "- [unreleased] <{}/compare/{}...HEAD>",
                     self.repository, versions[0].tag
                 )?;
                 for idx in 0..(versions.len() - 1) {
                     writeln!(
                         f,
-                        "- [{}] {}/compare/{}..{}",
+                        "- [{}] <{}/compare/{}..{}>",
                         versions[idx].version,
                         self.repository,
                         versions[idx + 1].tag,
@@ -152,7 +171,7 @@ impl std::fmt::Display for Changelog {
                 // The initial version is a commit url
                 writeln!(
                     f,
-                    "- [{}] {}/commits/{}",
+                    "- [{}] <{}/commits/{}>",
                     last.version, self.repository, last.tag
                 )?;
             }
@@ -195,6 +214,9 @@ impl std::fmt::Display for Changes {
 }
 
 impl Changelog {
+    /// Read a Changelog source file from a filesystem path
+    ///
+    /// Encoding is assumed based on extension, this may change in the future
     pub fn from_path(path: impl Into<std::path::PathBuf>) -> anyhow::Result<Changelog> {
         let path = path.into();
 
@@ -223,29 +245,35 @@ impl Changelog {
         }
     }
 
+    /// Parse a Changelog from a YAML string
     pub fn from_yaml(s: &str) -> anyhow::Result<Changelog> {
         let de = serde_yml::Deserializer::from_str(s);
         Ok(serde_path_to_error::deserialize(de)?)
     }
 
+    /// Parse a Changelog from a JSON string
     pub fn from_json(s: &str) -> anyhow::Result<Changelog> {
         let mut de = serde_json::Deserializer::from_str(s);
         Ok(serde_path_to_error::deserialize(&mut de)?)
     }
 
+    /// Parse a Changelog from a TOML string
     pub fn from_toml(s: &str) -> anyhow::Result<Changelog> {
         let de = toml::Deserializer::new(s);
         Ok(serde_path_to_error::deserialize(de)?)
     }
 
+    /// Serialize this Changelog into a YAML string
     pub fn to_yaml(&self) -> anyhow::Result<String> {
         Ok(serde_yml::to_string(&self)?)
     }
 
+    /// Serialize this Changelog into a TOML string
     pub fn to_toml(&self) -> anyhow::Result<String> {
         Ok(toml::to_string_pretty(&self)?)
     }
 
+    /// Serialize this Changelog into a JSON string
     pub fn to_json(&self) -> anyhow::Result<String> {
         Ok(serde_json::to_string_pretty(&self)? + "\n")
     }
