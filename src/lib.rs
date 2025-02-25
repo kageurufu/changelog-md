@@ -207,7 +207,9 @@ impl Changelog {
         Ok(serde_path_to_error::deserialize(de)?)
     }
 
-    pub fn from_path(path: &std::path::PathBuf) -> anyhow::Result<Changelog> {
+    pub fn from_path(path: impl Into<std::path::PathBuf>) -> anyhow::Result<Changelog> {
+        let path = path.into();
+
         if !path.exists() {
             return Err(anyhow!("no such file {}", path.display()));
         }

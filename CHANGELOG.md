@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`
 - `changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`
 
+### Fixed
+- Changelog::from_path now accepts `impl Into<std::path::PathBuf>`
+
 
 ## 1.0.0 - 2025-02-24
 

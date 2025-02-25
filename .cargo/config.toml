@@ -1,0 +1,2 @@
+[alias]
+changelog = "run -- --changelog CHANGELOG.yml"

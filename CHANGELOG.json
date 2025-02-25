@@ -6,6 +6,9 @@
     "added": [
       "`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`",
       "`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`"
+    ],
+    "fixed": [
+      "Changelog::from_path now accepts `impl Into<std::path::PathBuf>`"
     ]
   },
   "versions": {
