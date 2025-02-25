@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 repository = "https://github.com/kageurufu/changelog-md"
 
 [unreleased]
+
+[versions."1.1.0"]
+tag = "1.1.0"
+date = "2025-02-25"
+description = "First release made through `changelog-md release` 🎉"
 added = [
     "`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`",
     "`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`",
