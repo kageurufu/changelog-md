@@ -54,6 +54,6 @@ run = [
     'cargo set-version {{arg(name="version")}}',
     'cargo run -- --changelog CHANGELOG.yml release {{arg(name="version")}} {{arg(name="description")}}',
     'mise run pre-commit',
-    'git commit -am "Release {{arg(name="version")}}: {{arg(name="description")}}"',
-    'git tag -a "{{arg(name="version")}}" -m {{arg(name="description")}}',
+    'echo git commit -am "Release {{arg(name="version")}}: {{arg(name="description")}}"',
+    'echo git tag -a "{{arg(name="version")}}" -m {{arg(name="description")}}',
 ]
