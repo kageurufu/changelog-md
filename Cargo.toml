@@ -25,6 +25,10 @@ toml = "0.8.20"
 schemars = "0.8.21"
 chrono = "0.4.39"
 
+# git config parsing
+rust-ini = "0.21"
+dirs = "6.0.0"
+
 [dev-dependencies]
 assert_cmd = "2.0.16"
 assert_fs = "1.1.2"

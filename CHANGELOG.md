@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Attempt to find the current path's git remote url during init
+
 ### Changed
 
 - Don't write null descriptions or yank reasons

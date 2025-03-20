@@ -147,6 +147,27 @@ fn autodetect_source() -> anyhow::Result<std::path::PathBuf> {
     }
 }
 
+/// Search upwards for a .git/config with `[remote "origin"] url = ...`
+fn get_git_remote() -> Option<String> {
+    if let Ok(path) = std::env::current_dir() {
+        for path in path.ancestors() {
+            let git_config = path.join(".git/config");
+            if git_config.exists() {
+                if let Ok(contents) = std::fs::read_to_string(git_config) {
+                    if let Ok(conf) = ini::Ini::load_from_str(&contents) {
+                        if let Some(section) = conf.section(Some(r#"remote "origin""#)) {
+                            if let Some(url) = section.get("url") {
+                                return Some(url.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let changelog_file = {
@@ -164,7 +185,10 @@ fn main() -> anyhow::Result<()> {
             if filename.exists() {
                 Err(anyhow!("{} already exists", filename.display()))
             } else {
-                let seed = Changelog::default();
+                let mut seed = Changelog::default();
+                if let Some(url) = get_git_remote() {
+                    seed.repository = url;
+                };
                 let seed = format.to_string(&seed)?;
                 eprintln!("Writing initial {}", filename.display());
                 std::fs::write(filename, seed)?;

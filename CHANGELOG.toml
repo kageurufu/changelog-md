@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 repository = "https://github.com/kageurufu/changelog-md"
 
 [unreleased]
+added = ["Attempt to find the current path's git remote url during init"]
 changed = [
     "Don't write null descriptions or yank reasons",
     "Use mise for build tools, task management, and pre-commit hooks",
