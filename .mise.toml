@@ -1,6 +1,8 @@
 [tools]
 rust = "latest"
+usage = "latest"
 "cargo:cargo-nextest" = "latest"
+"cargo:cargo-edit" = "latest"
 
 [tasks.init]
 depends = "init:*"
@@ -46,3 +48,12 @@ run = "cargo run -- --changelog CHANGELOG.yml convert --force --format toml"
 
 [tasks."changelog:convert:json"]
 run = "cargo run -- --changelog CHANGELOG.yml convert --force --format json"
+
+[tasks.do-release]
+run = [
+    'cargo set-version {{arg(name="version")}}',
+    'cargo run -- --changelog CHANGELOG.yml release "{{arg(name="version")}}" "{{arg(name="description")}}"',
+    'mise run pre-commit',
+    'git commit -am "Release {{arg(name="version")}}: {{arg(name="description")}}"',
+    'git tag -a "{{arg(name="version")}}" -m "{{arg(name="description")}}"',
+]

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 repository = "https://github.com/kageurufu/changelog-md"
 
 [unreleased]
+
+[versions."1.1.2"]
+tag = "1.1.2"
+date = "2025-03-20"
+description = "'Minor release, cleaning up some defaults'"
 added = [
     "Attempt to find the current path's git remote url during init",
     "`yank` command to mark a version as yanked",
