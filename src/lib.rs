@@ -292,13 +292,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
             .into(),
             // TODO: Parse .git/config '[remote "origin"].url'
             repository: "https://github.com/me/my-swanky-project".into(),
-            unreleased: Default::default(),
-            versions: vec![Version {
-                version: "0.0.1".into(),
-                tag: "0.0.1".into(),
-                date: "1970-01-01".into(),
+            unreleased: Changes {
+                added: vec![
+                    "Starting using [changelog-md](https://github.com/kageurufu/changelog-md)"
+                        .to_string(),
+                ],
                 ..Default::default()
-            }],
+            },
+            versions: vec![],
         }
     }
 }
