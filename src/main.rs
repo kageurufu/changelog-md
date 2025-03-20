@@ -74,6 +74,9 @@ enum Command {
         /// Destination path
         destination: Option<std::path::PathBuf>,
     },
+
+    /// Generate release notes for a single version
+    ReleaseNotes { version: Option<String> },
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -237,6 +240,36 @@ fn main() -> anyhow::Result<()> {
                 destination.display()
             );
             Ok(std::fs::write(destination, format!("{}", &changelog))?)
+        }
+
+        Command::ReleaseNotes { version } => {
+            let changelog_file = changelog_file?;
+            let changelog = Changelog::from_path(&changelog_file)?;
+
+            match version {
+                None => {
+                    if changelog.unreleased.is_empty() {
+                        eprintln!("Warning: No unreleased changes, release notes will be empty");
+                    }
+                    print!("{}", changelog.unreleased);
+                    Ok(())
+                }
+
+                Some(version) => {
+                    for released_version in &changelog.versions {
+                        if released_version.version == version {
+                            print!("{}", released_version);
+                            return Ok(());
+                        }
+                    }
+
+                    eprintln!("Currently released versions:");
+                    for released_version in &changelog.versions {
+                        eprintln!("  {}", released_version.version);
+                    }
+                    bail!("Could not find version {}", version);
+                }
+            }
         }
 
         Command::Validate => {

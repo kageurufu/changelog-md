@@ -101,7 +101,8 @@ impl Changes {
         self.security.push(change)
     }
 
-    fn is_empty(&self) -> bool {
+    /// Check if this Changes is empty
+    pub fn is_empty(&self) -> bool {
         self.added.is_empty()
             && self.changed.is_empty()
             && self.deprecated.is_empty()
