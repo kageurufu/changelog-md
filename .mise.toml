@@ -1,0 +1,48 @@
+[tools]
+rust = "latest"
+"cargo:cargo-nextest" = "latest"
+
+[tasks.init]
+depends = "init:*"
+
+[tasks."init:pre-commit"]
+hide = true
+sources = []
+outputs = [".git/hooks/pre-commit"]
+run = "mise generate pre-commit --write"
+
+[tasks.changelog-md]
+run = "cargo run -- --changelog CHANGELOG.yml"
+
+[tasks.build]
+run = "cargo build"
+
+[tasks."build:release"]
+run = "cargo build --release"
+
+[tasks.format]
+run = "cargo fmt"
+
+[tasks.lint]
+depends = "lint:**"
+
+[tasks."lint:format"]
+run = "cargo fmt --check"
+
+[tasks."lint:clippy"]
+run = "cargo clippy"
+
+[tasks.test]
+run = "cargo nextest run"
+
+[tasks.pre-commit]
+depends = ["lint", "test", "changelog:**"]
+
+[tasks."changelog:render"]
+run = "cargo run -- --changelog CHANGELOG.yml render"
+
+[tasks."changelog:convert:toml"]
+run = "cargo run -- --changelog CHANGELOG.yml convert --force --format toml"
+
+[tasks."changelog:convert:json"]
+run = "cargo run -- --changelog CHANGELOG.yml convert --force --format json"

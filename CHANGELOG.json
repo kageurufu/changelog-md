@@ -4,7 +4,8 @@
   "repository": "https://github.com/kageurufu/changelog-md",
   "unreleased": {
     "changed": [
-      "Don't write null descriptions or yank reasons"
+      "Don't write null descriptions or yank reasons",
+      "Use mise for build tools, task management, and pre-commit hooks"
     ]
   },
   "versions": {

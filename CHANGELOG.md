@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Don't write null descriptions or yank reasons
+- Use mise for build tools, task management, and pre-commit hooks
 
 ## 1.1.1 - 2025-02-25
 
