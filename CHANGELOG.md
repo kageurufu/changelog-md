@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Attempt to find the current path's git remote url during init
+- `yank` command to mark a version as yanked
 
 ### Changed
 

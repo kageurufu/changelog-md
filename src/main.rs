@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::{anyhow, bail};
 use changelog_md::{Changelog, Version};
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -59,6 +59,14 @@ enum Command {
         version: String,
         /// Release description
         description: Option<String>,
+    },
+
+    /// Yank a release
+    Yank {
+        /// Version to yank
+        version: String,
+        /// Reason for yanking this version
+        reason: String,
     },
 
     /// Render a CHANGELOG to Markdown
@@ -304,6 +312,32 @@ fn main() -> anyhow::Result<()> {
                     ..Default::default()
                 },
             );
+
+            std::fs::write(&changelog_file, format.to_string(&changelog)?)?;
+
+            Ok(())
+        }
+
+        Command::Yank { version, reason } => {
+            let changelog_file = changelog_file?;
+            let format = Format::try_from(&changelog_file)?;
+            let mut changelog = Changelog::from_path(&changelog_file)?;
+
+            let mut success = false;
+            for released_version in &mut changelog.versions {
+                if released_version.version == version {
+                    released_version.yanked = Some(reason.clone());
+                    success = true;
+                }
+            }
+
+            if !success {
+                eprintln!("Currently released versions:");
+                for released_version in &changelog.versions {
+                    eprintln!("  {}", released_version.version);
+                }
+                bail!("Could not find version {} to yank", version);
+            }
 
             std::fs::write(&changelog_file, format.to_string(&changelog)?)?;
 
