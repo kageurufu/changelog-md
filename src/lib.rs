@@ -41,9 +41,10 @@ pub struct Version {
     #[schemars(regex(pattern = r"^\d{4}-[01]\d-[0-3]\d$"))]
     pub date: String,
     /// Optional Markdown description of this version
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// If a version was yanked, the reason why
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub yanked: Option<String>,
     /// Changes within this version
     #[serde(flatten)]

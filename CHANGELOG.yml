@@ -5,13 +5,14 @@ description: |
   The format is derived from [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 repository: https://github.com/kageurufu/changelog-md
-unreleased: {}
+unreleased:
+  changed:
+  - Don't write null descriptions or yank reasons
 versions:
   '1.1.1':
     tag: '1.1.1'
     date: '2025-02-25'
     description: Documentation update
-    yanked: null
     added:
     - documentation for all public members
     fixed:
@@ -20,7 +21,6 @@ versions:
     tag: '1.1.0'
     date: '2025-02-25'
     description: First release made through `changelog-md release` 🎉
-    yanked: null
     added:
     - '`changelog-md add [added|changed|deprecated|removed|fixed|security] [description]`'
     - '`changelog-md release [--tag=] [--date=] <VERSION> [DESCRIPTION]`'
@@ -41,4 +41,3 @@ versions:
     date: '2025-02-24'
     description: |
       Initial release, including the 1.0 Schema specification
-    yanked: null

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 repository = "https://github.com/kageurufu/changelog-md"
 
 [unreleased]
+changed = ["Don't write null descriptions or yank reasons"]
 
 [versions."1.1.1"]
 tag = "1.1.1"
