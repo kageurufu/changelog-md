@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use mise for build tools, task management, and pre-commit hooks
 - Don't write a fake version for a default changelog, instead add an unreleased "added - started using changelog-md"
 
+### Fixed
+
+- Error when attempting to release the same version twice
+
 ## 1.1.1 - 2025-02-25
 
 Documentation update

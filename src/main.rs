@@ -299,6 +299,10 @@ fn main() -> anyhow::Result<()> {
             let date = date.unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d").to_string());
             let tag = tag.unwrap_or(version.clone());
 
+            if changelog.versions.iter().any(|v| v.version == version) {
+                bail!("Version {} already exists!", version);
+            }
+
             let changes = changelog.unreleased;
             changelog.unreleased = Default::default();
             changelog.versions.insert(

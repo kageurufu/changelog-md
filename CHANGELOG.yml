@@ -13,6 +13,8 @@ unreleased:
   - Don't write null descriptions or yank reasons
   - Use mise for build tools, task management, and pre-commit hooks
   - Don't write a fake version for a default changelog, instead add an unreleased "added - started using changelog-md"
+  fixed:
+  - Error when attempting to release the same version twice
 versions:
   '1.1.1':
     tag: '1.1.1'
